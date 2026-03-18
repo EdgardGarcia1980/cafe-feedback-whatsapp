@@ -426,7 +426,7 @@ npm run dev
 
 ### Error: OpenAI quota exceeded
 - Verificar créditos en OpenAI
-- Considerar usar Anthropic Claude
+- Considerar agregar método de pago para aumentar quota
 
 ---
 
