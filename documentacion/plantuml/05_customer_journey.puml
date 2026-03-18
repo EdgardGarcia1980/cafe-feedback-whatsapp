@@ -1,0 +1,98 @@
+@startuml Customer_Journey_Map
+!define RECTANGLE class
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam defaultFontSize 12
+
+title Mapa del Recorrido del Cliente - Sistema de Feedback por WhatsApp
+
+|#lightblue|CLIENTE|
+start
+:Cliente visita el café
+y tiene una experiencia;
+note right
+  **Punto de contacto:**
+  Experiencia física
+  en el local
+end note
+
+:Decide compartir
+su opinión;
+note right
+  **Emoción:**
+  😊 Positiva
+  😐 Neutra
+  😞 Negativa
+end note
+
+:Abre WhatsApp y envía
+mensaje al número del café;
+note right
+  **Canal:**
+  WhatsApp
+
+  **Facilidad:**
+  ⭐⭐⭐⭐⭐
+  Muy fácil
+end note
+
+|#lightgreen|SISTEMA|
+:Twilio recibe el mensaje
+vía WhatsApp API;
+
+:Backend procesa
+el webhook;
+
+:Guarda mensaje
+en MongoDB;
+
+:OpenAI analiza
+el sentimiento;
+note right
+  **Proceso automático:**
+  - Identifica sentimiento
+  - Clasifica por tema
+  - Genera resumen
+end note
+
+:Actualiza base de datos
+con análisis completo;
+
+|#lightyellow|DUEÑO DEL CAFÉ|
+:Abre el tablero web
+en su navegador;
+
+:Ve estadísticas
+actualizadas;
+note right
+  **Información disponible:**
+  - Total de mensajes
+  - % de satisfacción
+  - Temas más mencionados
+  - Mensajes recientes
+end note
+
+:Analiza tendencias
+y toma decisiones;
+note right
+  **Acciones posibles:**
+  ✓ Mejorar servicio
+  ✓ Ajustar precios
+  ✓ Capacitar personal
+  ✓ Mejorar limpieza
+end note
+
+stop
+
+legend right
+  |= Etapa |= Duración |
+  | Cliente envía mensaje | < 1 minuto |
+  | Sistema procesa | 2-5 segundos |
+  | Análisis de IA | 1-3 segundos |
+  | Disponible en tablero | Inmediato |
+  | Actualización automática | Cada 10 segundos |
+endlegend
+
+@enduml

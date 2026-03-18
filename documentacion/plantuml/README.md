@@ -4,10 +4,16 @@ Esta carpeta contiene los diagramas C4 del sistema en formato PlantUML.
 
 ## Archivos
 
+### Diagramas C4
+
 1. **01_system_context.puml** - Diagrama de Contexto del Sistema (Nivel 1)
 2. **02_container.puml** - Diagrama de Contenedores (Nivel 2)
 3. **03_component.puml** - Diagrama de Componentes (Nivel 3)
 4. **04_deployment.puml** - Diagrama de Despliegue (Nivel 4)
+
+### Otros diagramas
+
+5. **05_customer_journey.puml** - Mapa del Recorrido del Cliente
 
 ## Cómo visualizar los diagramas
 
