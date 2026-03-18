@@ -9,8 +9,13 @@ app = Flask(__name__)
 
 # Configurar CORS para permitir requests desde el frontend
 CORS(app, resources={
-    r"/api/*": {"origins": "*"},
-    r"/webhook/*": {"origins": "*"}
+    r"/api/*": {
+        "origins": [
+            "http://localhost:3000",  # Desarrollo local
+            "https://*.vercel.app"     # Producción en Vercel
+        ]
+    },
+    r"/webhook/*": {"origins": "*"}  # Twilio puede venir de cualquier IP
 })
 
 # Registrar blueprints
