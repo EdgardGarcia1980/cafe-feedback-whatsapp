@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Usar URL de producción si está en build de producción, sino localhost
 const API_BASE_URL = import.meta.env.PROD
-  ? 'RAILWAY_URL_PLACEHOLDER/api'  // Se actualizará después del deploy
+  ? 'https://cafe-feedback-whatsapp-production.up.railway.app/api'
   : 'http://localhost:5000/api';
 
 export const api = {
