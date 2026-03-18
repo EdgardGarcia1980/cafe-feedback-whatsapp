@@ -2,7 +2,7 @@ flask==3.0.0
 flask-cors==4.0.0
 pymongo==4.6.1
 twilio==8.11.0
-openai==1.12.0
+openai==1.30.0
 python-dotenv==1.0.0
 pydantic==1.10.13
 gunicorn==21.2.0
