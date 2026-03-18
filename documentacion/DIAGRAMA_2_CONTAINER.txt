@@ -1,0 +1,299 @@
+================================================================================
+DIAGRAMA C4 - NIVEL 2: CONTAINER DIAGRAM
+Contenedores del Sistema de Análisis de Feedback
+================================================================================
+
+INSTRUCCIONES PARA DRAW.IO:
+1. Frontend = Rectángulo (Púrpura #8B5CF6)
+2. Backend = Rectángulo (Verde oscuro #059669)
+3. Base de datos = Cilindro (Naranja #F59E0B)
+4. Sistemas externos = Rectángulo redondeado (Gris #6B7280)
+5. Personas = Icono de persona (Azul #3B82F6)
+
+================================================================================
+
+                           ARQUITECTURA DE CONTENEDORES
+
+
+    [PERSONA]
+    ┌─────────────────┐
+    │    CLIENTE      │
+    │                 │
+    │  Cliente envía  │
+    │  feedback       │
+    └────────┬────────┘
+             │
+             │ (1) Envía WhatsApp
+             ▼
+    ┌──────────────────┐
+    │  Twilio API      │──────────┐
+    │  (Externo)       │          │
+    │                  │          │ (2) POST /webhook/whatsapp
+    │  WhatsApp Gateway│          │     Body: mensaje
+    └──────────────────┘          │     From: número
+                                  │
+                                  ▼
+         ┌────────────────────────────────────────────────┐
+         │  BACKEND API CONTAINER (Verde oscuro)          │
+         │  [Python + Flask]                              │
+         │  Puerto: 5000                                  │
+         │                                                │
+         │  • Webhook Controller                          │
+         │  • AI Analysis Service                         │
+         │  • Database Service                            │
+         │  • API REST Endpoints                          │
+         │                                                │
+         │  Responsabilidades:                            │
+         │  - Recibir webhooks de Twilio                  │
+         │  - Procesar mensajes                           │
+         │  - Analizar con IA                             │
+         │  - Almacenar en BD                             │
+         │  - Servir API para frontend                    │
+         └───┬────────────────┬───────────────────┬───────┘
+             │                │                   │
+             │                │                   │
+             │ (3) Analizar   │ (4) Guardar/      │ (5) HTTP GET
+             │     sentimiento│     Consultar     │     JSON
+             │     (HTTPS)    │     (MongoDB      │
+             │                │      Driver)      │
+             ▼                ▼                   ▼
+    ┌──────────────┐  ┌─────────────────┐  ┌──────────────────┐
+    │  OpenAI API  │  │  MongoDB Atlas  │  │ React Frontend   │
+    │  (Externo)   │  │   (Database)    │  │   (SPA)          │
+    │              │  │                 │  │                  │
+    │ GPT-3.5      │  │  [Cilindro]     │  │ [React + Vite]   │
+    │ Análisis de  │  │                 │  │  Puerto: 3000    │
+    │ sentimiento  │  │  Colección:     │  │                  │
+    │              │  │  • mensajes     │  │  Componentes:    │
+    │ Retorna JSON │  │                 │  │  • SentimentChart│
+    │ con:         │  │  Almacena:      │  │  • TopicsChart   │
+    │ -sentimiento │  │  • texto        │  │  • MessageFeed   │
+    │ -tema        │  │  • sentimiento  │  │  • StatsCard     │
+    │ -resumen     │  │  • tema         │  │                  │
+    │ -metadatos   │  │  • timestamp    │  │  Actualización:  │
+    └──────────────┘  │  • metadatos    │  │  Polling 10 seg  │
+                      └─────────────────┘  └────────┬─────────┘
+                                                    │
+                                                    │ (6) Visualiza
+                                                    │     dashboard
+                                                    ▼
+                                            ┌─────────────────┐
+                                            │    GERENTE      │
+                                            │    [PERSONA]    │
+                                            │                 │
+                                            │  Administrador  │
+                                            │  del café       │
+                                            └─────────────────┘
+
+
+================================================================================
+CONTENEDORES DETALLADOS:
+================================================================================
+
+CONTENEDOR 1: React Frontend (SPA)
+┌────────────────────────────────────────────────────────────┐
+│  Nombre: Dashboard Web                                     │
+│  Tecnología: React 18 + Vite + TailwindCSS + Recharts      │
+│  Puerto: 3000                                              │
+│  Color: Púrpura (#8B5CF6)                                  │
+│                                                            │
+│  Responsabilidades:                                        │
+│  • Visualizar estadísticas de sentimiento                  │
+│  • Mostrar gráficos (pastel, barras)                       │
+│  • Feed de mensajes en tiempo real                         │
+│  • Polling automático cada 10 segundos                     │
+│                                                            │
+│  Endpoints consumidos:                                     │
+│  • GET /api/sentimientos                                   │
+│  • GET /api/temas                                          │
+│  • GET /api/mensajes-recientes                             │
+│  • GET /api/stats                                          │
+└────────────────────────────────────────────────────────────┘
+
+
+CONTENEDOR 2: Backend API
+┌────────────────────────────────────────────────────────────┐
+│  Nombre: Backend Flask                                     │
+│  Tecnología: Python 3.10 + Flask + OpenAI SDK + PyMongo    │
+│  Puerto: 5000                                              │
+│  Color: Verde oscuro (#059669)                             │
+│                                                            │
+│  Responsabilidades:                                        │
+│  • Recibir webhooks de Twilio (POST /webhook/whatsapp)     │
+│  • Extraer datos del mensaje                               │
+│  • Llamar a OpenAI para análisis                           │
+│  • Almacenar en MongoDB                                    │
+│  • Servir API REST para dashboard                          │
+│                                                            │
+│  Endpoints expuestos:                                      │
+│  • POST /webhook/whatsapp - Webhook Twilio                 │
+│  • GET  /api/sentimientos - Distribución sentimientos      │
+│  • GET  /api/temas - Frecuencia de temas                   │
+│  • GET  /api/mensajes-recientes - Últimos mensajes         │
+│  • GET  /api/stats - Estadísticas generales                │
+│  • GET  /health - Health check                             │
+└────────────────────────────────────────────────────────────┘
+
+
+CONTENEDOR 3: MongoDB Database
+┌────────────────────────────────────────────────────────────┐
+│  Nombre: MongoDB Atlas                                     │
+│  Tecnología: MongoDB 7.x (Cloud)                           │
+│  Forma: CILINDRO (base de datos)                           │
+│  Color: Naranja (#F59E0B)                                  │
+│                                                            │
+│  Base de datos: cafe_feedback                              │
+│  Colección: mensajes                                       │
+│                                                            │
+│  Estructura del documento:                                 │
+│  {                                                         │
+│    _id: ObjectId,                                          │
+│    texto_mensaje: string,                                  │
+│    numero_remitente: string,                               │
+│    timestamp: ISODate,                                     │
+│    sentimiento: "positivo"|"negativo"|"neutro",            │
+│    tema: string,                                           │
+│    resumen: string,                                        │
+│    metadatos: {                                            │
+│      modelo_id: string,                                    │
+│      latencia_ms: number,                                  │
+│      version_prompt: string                                │
+│    }                                                       │
+│  }                                                         │
+└────────────────────────────────────────────────────────────┘
+
+
+SISTEMA EXTERNO 1: Twilio API
+┌────────────────────────────────────────────────────────────┐
+│  Nombre: Twilio WhatsApp Gateway                           │
+│  Tipo: Sistema externo                                     │
+│  Forma: Rectángulo redondeado                              │
+│  Color: Gris (#6B7280)                                     │
+│                                                            │
+│  Función:                                                  │
+│  • Recibir mensajes de WhatsApp                            │
+│  • Enviar webhook al backend                               │
+│  • POST con Body y From                                    │
+└────────────────────────────────────────────────────────────┘
+
+
+SISTEMA EXTERNO 2: OpenAI API
+┌────────────────────────────────────────────────────────────┐
+│  Nombre: OpenAI API                                        │
+│  Tipo: Sistema externo                                     │
+│  Forma: Rectángulo redondeado                              │
+│  Color: Gris (#6B7280)                                     │
+│                                                            │
+│  Función:                                                  │
+│  • Analizar sentimiento del texto                          │
+│  • Clasificar por tema                                     │
+│  • Generar resumen                                         │
+│  • Retornar JSON estructurado                              │
+│                                                            │
+│  Modelo: gpt-3.5-turbo                                     │
+│  Endpoint: https://api.openai.com/v1/chat/completions      │
+└────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+FLUJO DE DATOS:
+================================================================================
+
+FLUJO A: Cliente envía feedback
+  Cliente → Twilio → Backend API → MongoDB
+                  ↓
+                OpenAI API
+
+  1. Cliente envía WhatsApp
+  2. Twilio recibe y envía webhook
+  3. Backend recibe POST
+  4. Backend guarda en MongoDB
+  5. Backend llama OpenAI
+  6. OpenAI retorna análisis
+  7. Backend actualiza documento en MongoDB
+
+
+FLUJO B: Gerente visualiza dashboard
+  Frontend → Backend API → MongoDB → Frontend → Gerente
+
+  1. Frontend hace polling (cada 10 seg)
+  2. GET /api/sentimientos, /api/temas, etc.
+  3. Backend consulta MongoDB
+  4. MongoDB retorna datos
+  5. Backend formatea JSON
+  6. Frontend recibe y renderiza
+  7. Gerente ve dashboard actualizado
+
+
+================================================================================
+PROTOCOLOS DE COMUNICACIÓN:
+================================================================================
+
+Twilio → Backend API
+  • Protocolo: HTTPS
+  • Método: POST
+  • Endpoint: /webhook/whatsapp
+  • Formato: application/x-www-form-urlencoded
+  • Datos: Body, From, MessageSid, etc.
+
+Backend API → OpenAI
+  • Protocolo: HTTPS
+  • Método: POST
+  • Endpoint: /v1/chat/completions
+  • Formato: JSON
+  • Autenticación: Bearer token
+
+Backend API → MongoDB
+  • Protocolo: MongoDB Wire Protocol (sobre TCP)
+  • Driver: PyMongo
+  • Conexión: mongodb+srv:// (TLS)
+  • Operaciones: insert_one, update_one, aggregate
+
+Frontend → Backend API
+  • Protocolo: HTTP/HTTPS
+  • Método: GET
+  • Formato: JSON
+  • CORS: Habilitado
+  • Polling: Cada 10 segundos
+
+
+================================================================================
+POSICIONAMIENTO EN DRAW.IO:
+================================================================================
+
+     TOP
+     ┌─────────────┐
+     │   Cliente   │
+     └─────────────┘
+     ┌─────────────┐
+     │   Twilio    │
+     └─────────────┘
+
+     CENTRO (Grande)
+     ┌────────────────────────┐
+     │    Backend API         │
+     │    (2x más grande)     │
+     └────────────────────────┘
+
+     BOTTOM (3 contenedores en fila)
+     ┌──────────┐  ┌──────────┐  ┌──────────┐
+     │ OpenAI   │  │ MongoDB  │  │ Frontend │
+     └──────────┘  └──────────┘  └──────────┘
+
+     BOTTOM RIGHT
+                                 ┌──────────┐
+                                 │ Gerente  │
+                                 └──────────┘
+
+
+================================================================================
+TÍTULO DEL DIAGRAMA:
+================================================================================
+
+Sistema de Análisis de Feedback - Container Diagram
+Muestra los principales contenedores (aplicaciones) y cómo se comunican
+
+
+================================================================================
+FIN DEL DIAGRAMA 2 - CONTAINER
+================================================================================

@@ -1,0 +1,305 @@
+================================================================================
+CUSTOMER JOURNEY MAP - VISUAL
+Dashboard de Sentimiento del Cliente vía WhatsApp
+================================================================================
+
+INSTRUCCIONES PARA MIRO/DRAW.IO:
+1. Crear 10 columnas (una por fase)
+2. Cada fase tiene 5 filas: Acción, Touchpoint, Emoción, Pain Points, Oportunidades
+3. Usar iconos de emojis para emociones
+4. Colores: Verde (positivo), Rojo (negativo), Amarillo (neutral)
+5. Flechas entre fases para mostrar flujo
+
+================================================================================
+
+                        CUSTOMER JOURNEY MAP
+                    Café de El Salvador - Sistema de Feedback
+
+
+TIMELINE: Desde que el cliente visita el café hasta que gerente toma acción
+DURACIÓN TOTAL: ~5-15 minutos (Fase 1-8), Continuo (Fase 9-10)
+
+================================================================================
+
+┌──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
+│ FASE 1   │ FASE 2   │ FASE 3   │ FASE 4   │ FASE 5   │ FASE 6   │ FASE 7   │ FASE 8   │ FASE 9   │ FASE 10  │
+│          │          │          │          │          │          │          │          │          │          │
+│Experienci│Invitación│Cliente   │Sistema   │Backend   │IA        │Actuali-  │Dashboard │Gerente   │Gerente   │
+│a en Café │a Feedback│Envía     │Recibe    │Procesa   │Analiza   │zación BD │Actualiza │Visualiza │Toma      │
+│          │          │WhatsApp  │Mensaje   │Mensaje   │          │          │          │          │Decisión  │
+├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤
+│          │          │          │          │          │          │          │          │          │          │
+│ ACCIÓN   │ ACCIÓN   │ ACCIÓN   │ ACCIÓN   │ ACCIÓN   │ ACCIÓN   │ ACCIÓN   │ ACCIÓN   │ ACCIÓN   │ ACCIÓN   │
+│          │          │          │          │          │          │          │          │          │          │
+│• Visita  │• Ve QR   │• Abre    │• WhatsApp│• Webhook │• Construye│• Database│• Frontend│• Abre    │• Analiza │
+│  café    │  code o  │  WhatsApp│  reenvía │  recibe  │  prompt  │  Service │  hace    │  browser │  tendencia│
+│• Hace    │  número  │• Redacta │  a Twilio│  POST    │  Few-shot│  actualiza│  polling │• Revisa  │• Identi- │
+│  pedido  │• Recibe  │  mensaje │• Twilio  │• Extrae  │• Llama   │  docu-   │  (10 seg)│  stats   │  fica    │
+│• Consume │  invita- │• Envía   │  prepara │  Body,   │  OpenAI  │  mento   │• Recibe  │• Ve      │  problemas│
+│  producto│  ción    │  feedback│  webhook │  From    │  API     │  con     │  datos   │  gráficos│• Toma    │
+│• Experi- │  verbal  │          │          │• Guarda  │• Valida  │  análisis│• Re-     │• Lee     │  acción  │
+│  menta   │          │          │          │  en BD   │  JSON    │          │  renderiza│  mensajes│          │
+│  servicio│          │          │          │          │          │          │          │          │          │
+│          │          │          │          │          │          │          │          │          │          │
+│Duración: │Duración: │Duración: │Duración: │Duración: │Duración: │Duración: │Duración: │Duración: │Duración: │
+│15-45 min │30-60 seg │1-3 min   │<1 seg    │1-3 seg   │2-5 seg   │<500ms    │0-10 seg  │Continuo  │Variable  │
+├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤
+│          │          │          │          │          │          │          │          │          │          │
+│TOUCHPOINT│TOUCHPOINT│TOUCHPOINT│TOUCHPOINT│TOUCHPOINT│TOUCHPOINT│TOUCHPOINT│TOUCHPOINT│TOUCHPOINT│TOUCHPOINT│
+│          │          │          │          │          │          │          │          │          │          │
+│• Personal│• QR en   │• WhatsApp│• WhatsApp│• Flask   │• OpenAI  │• MongoDB │• React   │• Browser │• Café    │
+│  servicio│  ticket  │  app     │  Business│  Backend │  GPT-3.5 │  Atlas   │  Dashboard│  web     │  físico  │
+│• Calidad │• Cartel  │• Teclado │  API     │• Twilio  │  API     │• PyMongo │• Recharts│• Desktop │• Personal│
+│  producto│  en mesa │  móvil   │• Twilio  │  webhook │• Prompt  │  driver  │  graphs  │  /Tablet │• Ambiente│
+│• Ambiente│• Mensaje │• Internet│  API     │• MongoDB │  engine  │          │• Axios   │• WiFi    │• Menú    │
+│  café    │  mesero  │          │  Gateway │          │          │          │  HTTP    │          │• Precios │
+│• Precio  │          │          │          │          │          │          │          │          │          │
+│  pagado  │          │          │          │          │          │          │          │          │          │
+├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤
+│          │          │          │          │          │          │          │          │          │          │
+│ EMOCIÓN  │ EMOCIÓN  │ EMOCIÓN  │ EMOCIÓN  │ EMOCIÓN  │ EMOCIÓN  │ EMOCIÓN  │ EMOCIÓN  │ EMOCIÓN  │ EMOCIÓN  │
+│          │          │          │          │          │          │          │          │          │          │
+│😊 Si     │🤔 Consi- │✍️ Escribe│✅ Mensaje│⏳ Espe-  │🤖 Proce- │💾 Alma-  │🔄 Actua- │📊 Anali- │💡 Inspi- │
+│experien- │dera si   │  opinión │  enviado │  rando   │  sando   │  cenando │  lizando │  zando   │  rado    │
+│cia fue   │vale la   │          │          │  (usuario│  (automá-│  (automá-│  (automá-│  datos   │          │
+│positiva  │pena      │          │          │  no lo ve│  tico)   │  tico)   │  tico)   │          │          │
+│          │          │          │          │  pero    │          │          │          │          │          │
+│😐 Si fue │💭 Recuer-│          │          │  espera  │          │          │          │          │          │
+│promedio  │da expe-  │          │          │  respuesta│          │          │          │          │          │
+│          │riencia   │          │          │  )       │          │          │          │          │          │
+│😞 Si fue │          │          │          │          │          │          │          │          │          │
+│negativa  │          │          │          │          │          │          │          │          │          │
+│          │          │          │          │          │          │          │          │          │          │
+│Color:    │Color:    │Color:    │Color:    │Color:    │Color:    │Color:    │Color:    │Color:    │Color:    │
+│Variable  │Amarillo  │Azul      │Verde     │Amarillo  │Azul      │Verde     │Azul      │Variable  │Verde     │
+├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤
+│          │          │          │          │          │          │          │          │          │          │
+│PAIN      │PAIN      │PAIN      │PAIN      │PAIN      │PAIN      │PAIN      │PAIN      │PAIN      │PAIN      │
+│POINTS    │POINTS    │POINTS    │POINTS    │POINTS    │POINTS    │POINTS    │POINTS    │POINTS    │POINTS    │
+│          │          │          │          │          │          │          │          │          │          │
+│❌ Tiempo │❌ Falta  │❌ Falta  │⚠️ Puede  │⚠️ Timeout│⚠️ API    │⚠️ Fallo  │⚠️ Delay  │❌ No hay │❌ Falta  │
+│espera    │de tiempo │de moti-  │fallar si │si backend│puede     │en BD     │hasta 10  │alertas   │tiempo    │
+│largo     │          │vación    │Twilio    │caído     │fallar    │puede     │segundos  │proactivas│para      │
+│          │❌ No ve  │          │tiene     │          │          │perder    │para ver  │          │analizar  │
+│❌ Servicio│beneficio│❌ Pereza │problemas │⚠️ Error  │⚠️ Res-   │mensaje   │cambios   │❌ No puede│todos los │
+│descortés │inmediato │de       │de red    │procesando│puesta    │          │          │responder │mensajes  │
+│          │          │escribir  │          │puede     │JSON      │          │❌ Mucha  │a cliente │          │
+│❌ Producto│❌ Preocu-│          │⚠️ Latencia│dejar     │inválida  │          │info para │directa-  │❌ Sobre-  │
+│no cumple │pación    │❌ No hay │          │mensaje   │puede no  │          │procesar  │mente     │carga de  │
+│expecta-  │privacidad│confirma- │          │sin       │guardar   │          │          │          │informa-  │
+│tivas     │          │ción      │          │procesar  │          │          │          │          │ción      │
+│          │          │inmediata │          │          │          │          │          │          │          │
+│❌ Limpieza│          │          │          │          │          │          │          │          │          │
+│deficiente│          │          │          │          │          │          │          │          │          │
+│          │          │          │          │          │          │          │          │          │          │
+│❌ Precio │          │          │          │          │          │          │          │          │          │
+│elevado   │          │          │          │          │          │          │          │          │          │
+├──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┼──────────┤
+│          │          │          │          │          │          │          │          │          │          │
+│OPORTUNI- │OPORTUNI- │OPORTUNI- │OPORTUNI- │OPORTUNI- │OPORTUNI- │OPORTUNI- │OPORTUNI- │OPORTUNI- │OPORTUNI- │
+│DADES     │DADES     │DADES     │DADES     │DADES     │DADES     │DADES     │DADES     │DADES     │DADES     │
+│          │          │          │          │          │          │          │          │          │          │
+│✨ Mejorar│✨ Gamifi-│✨ Auto-  │✨ Redun- │✨ Retry  │✨ Fine-  │✨ Trans- │✨ WebSockets│✨ Push   │✨ Auto-  │
+│calidad   │cación:   │respuesta │dancia:   │logic     │tuning    │acción    │para      │notifica- │respuesta │
+│servicio  │descuento │inmediata │múltiples │automático│para      │para      │updates   │ciones    │a cliente │
+│          │en próxima│"Gracias  │canales   │          │mejorar   │garantizar│en tiempo │en tiempo │desde     │
+│✨ Capacitar│visita   │por tu    │(WhatsApp,│✨ Queue  │precisión │consisten-│real      │real para │dashboard │
+│personal  │          │feedback!"│SMS, web) │para      │          │cia       │          │problemas │          │
+│          │✨ Mostrar│          │          │procesar  │✨ Cache  │          │✨ Filtros│urgentes  │✨ IA sugie-│
+│✨ Ajustar│impacto   │✨ Confir-│✨ Load   │mensajes  │de resul- │✨ Backup │y búsqueda│          │re acciones│
+│precios   │de feed-  │mación    │balancing │masivos   │tados     │automático│avanzada  │✨ Export │basadas en│
+│          │back en   │visual    │para alta │          │frecuentes│          │          │reportes  │patrones  │
+│✨ Mejorar│dashboard │(checkmark│disponibi-│✨ Logging│          │✨ Vali-  │✨ Compara-│PDF/Excel │          │
+│limpieza  │(cierre   │)         │lidad     │detallado │✨ Metrics│dación    │tivas     │          │✨ Inte-  │
+│protocolos│del loop) │          │          │          │de latencia│extra de  │temporales│✨ Drill- │gración   │
+│          │          │          │          │          │y accuracy│esquema   │(semana vs│down en   │CRM para  │
+│          │          │          │          │          │          │          │mes)      │mensajes  │identificar│
+│          │          │          │          │          │          │          │          │específicos│clientes  │
+│          │          │          │          │          │          │          │          │          │frecuentes│
+└──────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┴──────────┘
+
+
+================================================================================
+ACTORES INVOLUCRADOS:
+================================================================================
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ ACTOR 1: CLIENTE                                                         │
+│ ─────────────────                                                        │
+│ Rol: Usuario final del café que envía feedback                          │
+│ Participa en: Fases 1, 2, 3                                              │
+│ Objetivo: Compartir su experiencia (buena o mala)                        │
+│ Motivaciones:                                                            │
+│ • Quiere ser escuchado                                                   │
+│ • Espera mejoras si feedback es negativo                                 │
+│ • Quiere elogiar si experiencia fue excelente                            │
+│ Frustraciones:                                                           │
+│ • No saber si su mensaje fue leído                                       │
+│ • No ver acción basada en su feedback                                    │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ ACTOR 2: SISTEMA AUTOMATIZADO                                           │
+│ ──────────────────────────────                                          │
+│ Rol: Procesa mensajes sin intervención humana                           │
+│ Participa en: Fases 4, 5, 6, 7, 8                                        │
+│ Objetivo: Transformar texto en insights accionables                      │
+│ Componentes:                                                             │
+│ • WhatsApp + Twilio (mensajería)                                         │
+│ • Backend Flask (procesamiento)                                          │
+│ • OpenAI (análisis)                                                      │
+│ • MongoDB (almacenamiento)                                               │
+│ • React (visualización)                                                  │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ ACTOR 3: GERENTE                                                         │
+│ ───────────────                                                          │
+│ Rol: Administrador que toma decisiones de negocio                        │
+│ Participa en: Fases 9, 10                                                │
+│ Objetivo: Mejorar el negocio basándose en datos                          │
+│ Necesidades:                                                             │
+│ • Datos claros y visuales                                                │
+│ • Insights accionables                                                   │
+│ • Detección temprana de problemas                                        │
+│ • Tendencias a lo largo del tiempo                                       │
+│ Decisiones que toma:                                                     │
+│ • Ajustar precios                                                        │
+│ • Mejorar protocolos de limpieza                                         │
+│ • Capacitar personal                                                     │
+│ • Modificar menú                                                         │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+MÉTRICAS CLAVE DEL JOURNEY:
+================================================================================
+
+┌────────────────────────────────────────────────────────────────┐
+│ MÉTRICA                        │ ACTUAL    │ OBJETIVO         │
+├────────────────────────────────┼───────────┼──────────────────┤
+│ Tiempo total (Fase 3 → 8)      │ 8-12 seg  │ <15 seg          │
+│ Tasa conversión (visita→feed)  │ 3-8%      │ >5%              │
+│ Latencia de IA                 │ 2-3 seg   │ <3 seg           │
+│ Actualización dashboard        │ 10 seg    │ <15 seg          │
+│ Precisión de análisis IA       │ 85-95%    │ >90%             │
+│ Satisfacción con proceso       │ N/A       │ >80% (futura enc)│
+└────────────────────────────────┴───────────┴──────────────────┘
+
+
+================================================================================
+EMOCIONES A LO LARGO DEL JOURNEY (GRÁFICO):
+================================================================================
+
+   Nivel de
+   Satisfacción
+       │
+   😊  │        ╱╲                                    ╱‾‾‾╲
+       │       ╱  ╲                                  ╱     ╲___
+   😐  │      ╱    ╲                         _______╱
+       │     ╱      ╲___________________    ╱
+   😞  │____╱                            ╲__╱
+       │
+       └─────┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──────> Tiempo
+             1  2  3  4  5  6  7  8  9  10
+
+   Fase 1: Variable (depende de experiencia)
+   Fase 2: Considerando (neutral a ligeramente negativo)
+   Fase 3: Escribiendo (ligero estrés)
+   Fase 4-7: No visible para usuario (neutro para ellos)
+   Fase 8: Dashboard actualiza (no afecta al cliente)
+   Fase 9: Gerente analiza (puede ser positivo o preocupado)
+   Fase 10: Gerente toma acción (satisfecho/empoderado)
+
+
+================================================================================
+TOUCHPOINTS VISUALES (PARA DIBUJAR):
+================================================================================
+
+Fase 1: [Icono: ☕ Taza de café]
+Fase 2: [Icono: 📱 QR Code]
+Fase 3: [Icono: 💬 WhatsApp verde]
+Fase 4: [Icono: 🌐 Nube (Twilio)]
+Fase 5: [Icono: 🔧 Engranaje (Backend)]
+Fase 6: [Icono: 🤖 Robot (IA)]
+Fase 7: [Icono: 💾 Base de datos]
+Fase 8: [Icono: 🔄 Flechas circulares (refresh)]
+Fase 9: [Icono: 📊 Gráfico de barras]
+Fase 10: [Icono: ✅ Checkmark (acción)]
+
+
+================================================================================
+COLORES PARA CADA FASE (CÓDIGO HEXADECIMAL):
+================================================================================
+
+Fase 1: #F59E0B (Naranja - experiencia variable)
+Fase 2: #FBBF24 (Amarillo - consideración)
+Fase 3: #3B82F6 (Azul - acción del cliente)
+Fase 4: #6B7280 (Gris - sistema automático)
+Fase 5: #059669 (Verde oscuro - procesamiento)
+Fase 6: #8B5CF6 (Púrpura - IA)
+Fase 7: #F59E0B (Naranja - almacenamiento)
+Fase 8: #3B82F6 (Azul - visualización)
+Fase 9: #10B981 (Verde - análisis gerencial)
+Fase 10: #059669 (Verde oscuro - acción)
+
+
+================================================================================
+INSTRUCCIONES PARA CREAR EN MIRO:
+================================================================================
+
+1. Crear tablero nuevo "Customer Journey Map"
+
+2. Usar template de "Customer Journey Map" o crear desde cero
+
+3. Crear 10 columnas (sticky notes o frames)
+
+4. Para cada columna agregar:
+   - Título de la fase (grande, bold)
+   - Duración (pequeño, arriba)
+   - Actor involucrado (icono de persona)
+   - Acción (bullet points)
+   - Touchpoint (iconos)
+   - Emoción (emoji grande)
+   - Pain points (sticky notes rojos)
+   - Oportunidades (sticky notes verdes)
+
+5. Conectar fases con flechas
+
+6. Agregar línea de emociones (gráfico como mostrado arriba)
+
+7. Agregar sección de métricas en la parte inferior
+
+8. Usar colores según la tabla de arriba
+
+9. Exportar como PDF o PNG de alta resolución
+
+
+================================================================================
+INSIGHTS CLAVE DEL JOURNEY:
+================================================================================
+
+🎯 MOMENTO DE VERDAD 1: Fase 2 (Invitación)
+   • 70% de los clientes deciden aquí si darán feedback o no
+   • Crítico: Hacer la invitación atractiva y fácil
+
+🎯 MOMENTO DE VERDAD 2: Fase 3 (Envío de WhatsApp)
+   • Si toma >3 minutos, probabilidad de abandono aumenta 50%
+   • Solución: Mensaje rápido, no formulario largo
+
+🎯 MOMENTO DE VERDAD 3: Fase 10 (Acción del Gerente)
+   • Si no hay acción visible, cliente se desmotiva a dar feedback futuro
+   • Oportunidad: Cerrar el loop con auto-respuesta
+
+⚠️ MAYOR PAIN POINT: Falta de feedback loop
+   • Cliente no sabe si fue leído
+   • Solución futura: Auto-respuesta WhatsApp
+
+✨ MAYOR OPORTUNIDAD: Automatización completa
+   • Procesos 4-8 son 100% automáticos
+   • Escalable sin costo adicional
+
+
+================================================================================
+FIN DEL CUSTOMER JOURNEY MAP
+================================================================================

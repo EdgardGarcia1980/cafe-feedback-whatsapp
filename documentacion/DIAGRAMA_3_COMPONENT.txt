@@ -1,0 +1,483 @@
+================================================================================
+DIAGRAMA C4 - NIVEL 3: COMPONENT DIAGRAM
+Componentes Internos del Backend API
+================================================================================
+
+INSTRUCCIONES PARA DRAW.IO:
+1. Componentes = Rectángulos con ícono de engranaje (diferentes tonos de verde)
+2. Módulos de configuración = Rectángulo pequeño (amarillo)
+3. Sistemas externos = Rectángulo redondeado (gris)
+4. Flechas = Líneas con números indicando orden de ejecución
+
+================================================================================
+
+                    COMPONENTES DEL BACKEND API (Flask)
+
+
+    [EXTERNO: Twilio]
+         │
+         │ (1) POST /webhook/whatsapp
+         │     Body="mensaje", From="+123..."
+         ▼
+    ┌────────────────────────────────────────────────────────────┐
+    │  WEBHOOK CONTROLLER                                        │
+    │  [routes/webhook_routes.py]                                │
+    │  Color: Verde claro (#10B981)                              │
+    │                                                            │
+    │  Responsabilidades:                                        │
+    │  • Recibir request HTTP de Twilio                          │
+    │  • Validar firma de Twilio (seguridad)                     │
+    │  • Extraer Body y From del request                         │
+    │  • Orquestar el flujo de procesamiento                     │
+    │  • Retornar 200 OK a Twilio                                │
+    │                                                            │
+    │  Endpoints:                                                │
+    │  • POST /webhook/whatsapp                                  │
+    │  • GET  /webhook/status                                    │
+    └───┬───────────────────────┬───────────────────────────────┘
+        │                       │
+        │ (2) Guardar mensaje   │
+        │     save_message(     │
+        │       texto,          │
+        │       numero          │
+        │     )                 │
+        ▼                       │
+    ┌────────────────────────────────┐
+    │  DATABASE SERVICE              │
+    │  [services/database_service.py]│
+    │  Color: Verde medio (#059669)  │
+    │                                │
+    │  Responsabilidades:            │
+    │  • CRUD en MongoDB             │
+    │  • Agregaciones estadísticas   │
+    │  • Gestión de conexión         │
+    │                                │
+    │  Métodos públicos:             │
+    │  • save_message()              │
+    │  • update_message_analysis()   │
+    │  • get_all_messages()          │
+    │  • get_sentiment_stats()       │
+    │  • get_topic_stats()           │
+    │  • get_message_by_id()         │
+    └───┬────────────────────┬───────┘
+        │                    │
+        │ (3) INSERT         │ (7) UPDATE
+        │     documento      │     con análisis
+        ▼                    │
+    [MongoDB Atlas]          │
+         │                   │
+         │ (4) Retorna       │
+         │     message_id    │
+         ▼                   │
+    [Webhook Controller] ────┘
+         │
+         │ (5) Analizar
+         │     analizar_sentimiento(texto)
+         ▼
+    ┌────────────────────────────────┐
+    │  AI ANALYSIS SERVICE           │
+    │  [services/ai_service.py]      │
+    │  Color: Verde oscuro (#047857) │
+    │                                │
+    │  Responsabilidades:            │
+    │  • Construcción del prompt     │
+    │  • Llamada a OpenAI API        │
+    │  • Validación de respuesta     │
+    │  • Parsing de JSON             │
+    │  • Cálculo de metadatos        │
+    │  • Manejo de errores           │
+    │                                │
+    │  Métodos públicos:             │
+    │  • analizar_sentimiento(texto) │
+    │                                │
+    │  Retorna:                      │
+    │  {                             │
+    │    sentimiento: string,        │
+    │    tema: string,               │
+    │    resumen: string,            │
+    │    metadatos: {                │
+    │      modelo_id: string,        │
+    │      latencia_ms: int,         │
+    │      version_prompt: string,   │
+    │      tokens_used: int          │
+    │    }                           │
+    │  }                             │
+    └───┬────────────────────────────┘
+        │
+        │ (6) API Request
+        │     POST /v1/chat/completions
+        │     {model, messages, temperature}
+        ▼
+    [OpenAI API]
+         │
+         │ Retorna JSON
+         ▼
+    [AI Analysis Service]
+         │
+         │ (8) Retorna análisis
+         │     a Webhook Controller
+         ▼
+    [Webhook Controller]
+         │
+         │ (9) Actualizar BD
+         │     update_message_analysis(
+         │       id, sentimiento, tema,
+         │       resumen, metadatos
+         │     )
+         ▼
+    [Database Service] ───(10) UPDATE──> [MongoDB]
+
+
+    ══════════════════════════════════════════════════════════
+
+
+    [EXTERNO: React Frontend]
+         │
+         │ (11) GET /api/sentimientos
+         │      GET /api/temas
+         │      GET /api/mensajes-recientes
+         │      GET /api/stats
+         ▼
+    ┌────────────────────────────────────────────────────────────┐
+    │  API CONTROLLER                                            │
+    │  [routes/api_routes.py]                                    │
+    │  Color: Verde claro (#10B981)                              │
+    │                                                            │
+    │  Responsabilidades:                                        │
+    │  • Exponer endpoints REST                                  │
+    │  • Validar requests                                        │
+    │  • Formatear respuestas JSON                               │
+    │  • Manejo de errores HTTP                                  │
+    │                                                            │
+    │  Endpoints:                                                │
+    │  • GET /api/sentimientos                                   │
+    │  • GET /api/temas                                          │
+    │  • GET /api/mensajes-recientes                             │
+    │  • GET /api/stats                                          │
+    └───┬────────────────────────────────────────────────────────┘
+        │
+        │ (12) Llamadas a métodos:
+        │      get_sentiment_stats()
+        │      get_topic_stats()
+        │      get_all_messages()
+        ▼
+    [Database Service] ───(13) Agregaciones──> [MongoDB]
+                                    │
+                                    │ (14) Retorna datos
+                                    ▼
+    [API Controller] ────(15) JSON Response──> [Frontend]
+
+
+    ══════════════════════════════════════════════════════════
+
+
+    COMPONENTE DE CONFIGURACIÓN:
+
+    ┌────────────────────────────┐
+    │  CONFIG MODULE             │
+    │  [config.py]               │
+    │  Color: Amarillo (#F59E0B) │
+    │                            │
+    │  • Carga .env              │
+    │  • Centraliza variables    │
+    │  • Valida credenciales     │
+    │                            │
+    │  Variables:                │
+    │  • TWILIO_*                │
+    │  • MONGODB_URI             │
+    │  • OPENAI_API_KEY          │
+    │  • PORT, FLASK_ENV         │
+    └────────────────────────────┘
+              │
+              │ Importado por todos los componentes
+              ▼
+    [Todos los servicios y controllers]
+
+
+================================================================================
+COMPONENTES DETALLADOS:
+================================================================================
+
+COMPONENTE 1: Webhook Controller
+┌────────────────────────────────────────────────────────────┐
+│ Archivo: routes/webhook_routes.py                          │
+│ Tipo: Controller                                           │
+│ Patrón: MVC Controller                                     │
+│ Color: Verde claro (#10B981)                               │
+│                                                            │
+│ Función Principal:                                         │
+│ @webhook_bp.route('/webhook/whatsapp', methods=['POST'])   │
+│ def whatsapp_webhook():                                    │
+│     texto = request.form.get('Body')                       │
+│     numero = request.form.get('From')                      │
+│     message_id = db_service.save_message(texto, numero)    │
+│     analisis = ai_service.analizar_sentimiento(texto)      │
+│     db_service.update_message_analysis(message_id, ...)    │
+│     return '', 200                                         │
+│                                                            │
+│ Dependencias:                                              │
+│ • database_service (inyectado)                             │
+│ • ai_service (inyectado)                                   │
+│ • Flask request                                            │
+└────────────────────────────────────────────────────────────┘
+
+
+COMPONENTE 2: API Controller
+┌────────────────────────────────────────────────────────────┐
+│ Archivo: routes/api_routes.py                              │
+│ Tipo: Controller                                           │
+│ Patrón: MVC Controller                                     │
+│ Color: Verde claro (#10B981)                               │
+│                                                            │
+│ Endpoints:                                                 │
+│                                                            │
+│ GET /api/sentimientos                                      │
+│ → Retorna distribución de sentimientos (counts, %)         │
+│                                                            │
+│ GET /api/temas                                             │
+│ → Retorna frecuencia de cada tema                          │
+│                                                            │
+│ GET /api/mensajes-recientes                                │
+│ → Retorna últimos 50 mensajes con análisis                 │
+│                                                            │
+│ GET /api/stats                                             │
+│ → Retorna estadísticas generales                           │
+│                                                            │
+│ Dependencias:                                              │
+│ • database_service (inyectado)                             │
+└────────────────────────────────────────────────────────────┘
+
+
+COMPONENTE 3: Database Service
+┌────────────────────────────────────────────────────────────┐
+│ Archivo: services/database_service.py                      │
+│ Tipo: Service / Data Access Layer                          │
+│ Patrón: Repository Pattern                                 │
+│ Color: Verde medio (#059669)                               │
+│                                                            │
+│ Responsabilidades:                                         │
+│ • Abstracción de MongoDB                                   │
+│ • Operaciones CRUD                                         │
+│ • Agregaciones complejas                                   │
+│                                                            │
+│ Métodos principales:                                       │
+│                                                            │
+│ save_message(texto, numero) → message_id                   │
+│   └─ Inserta documento nuevo en colección                  │
+│                                                            │
+│ update_message_analysis(id, sent, tema, res, meta) → void │
+│   └─ Actualiza documento con análisis de IA                │
+│                                                            │
+│ get_all_messages(limit=50) → List[dict]                    │
+│   └─ Consulta mensajes ordenados por timestamp desc        │
+│                                                            │
+│ get_sentiment_stats() → Dict[str, int]                     │
+│   └─ Agregación: group by sentimiento, count               │
+│                                                            │
+│ get_topic_stats() → Dict[str, int]                         │
+│   └─ Agregación: group by tema, count                      │
+│                                                            │
+│ Conexión:                                                  │
+│ • MongoClient(Config.MONGODB_URI)                          │
+│ • Database: cafe_feedback                                  │
+│ • Collection: mensajes                                     │
+└────────────────────────────────────────────────────────────┘
+
+
+COMPONENTE 4: AI Analysis Service
+┌────────────────────────────────────────────────────────────┐
+│ Archivo: services/ai_service.py                            │
+│ Tipo: Service / Business Logic                             │
+│ Patrón: Service Layer                                      │
+│ Color: Verde oscuro (#047857)                              │
+│                                                            │
+│ Responsabilidades:                                         │
+│ • Construcción de prompt (Few-shot)                        │
+│ • Llamada a OpenAI API                                     │
+│ • Validación de respuesta JSON                             │
+│ • Normalización de valores                                 │
+│ • Cálculo de metadatos (latencia, tokens)                  │
+│                                                            │
+│ Método principal:                                          │
+│                                                            │
+│ analizar_sentimiento(texto: str) → dict:                   │
+│   1. Construir prompt con ejemplos Few-shot                │
+│   2. Llamar OpenAI API (gpt-3.5-turbo)                     │
+│   3. Parsear respuesta JSON                                │
+│   4. Validar campos y valores                              │
+│   5. Calcular metadatos                                    │
+│   6. Retornar {sentimiento, tema, resumen, metadatos}      │
+│                                                            │
+│ Configuración:                                             │
+│ • Model: gpt-3.5-turbo                                     │
+│ • Temperature: 0.3                                         │
+│ • Max tokens: 200                                          │
+│ • Prompt version: 1.0                                      │
+│                                                            │
+│ Manejo de errores:                                         │
+│ • Try-catch para API failures                              │
+│ • Retry logic (máx 3 intentos)                             │
+│ • Fallback a valores por defecto                           │
+└────────────────────────────────────────────────────────────┘
+
+
+COMPONENTE 5: Config Module
+┌────────────────────────────────────────────────────────────┐
+│ Archivo: config.py                                         │
+│ Tipo: Configuration                                        │
+│ Color: Amarillo (#F59E0B)                                  │
+│                                                            │
+│ Clase Config:                                              │
+│   TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')    │
+│   TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')      │
+│   MONGODB_URI = os.getenv('MONGODB_URI')                  │
+│   OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')            │
+│   PORT = int(os.getenv('PORT', 5000))                     │
+│                                                            │
+│ Patrón:                                                    │
+│ • Singleton (clase estática)                               │
+│ • Environment variables                                    │
+│ • Centralización de configuración                          │
+└────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+FLUJO DE DATOS DETALLADO:
+================================================================================
+
+SECUENCIA: Recibir y Procesar Mensaje de WhatsApp
+
+1. [Twilio] → POST /webhook/whatsapp
+   Body="El café estaba delicioso", From="whatsapp:+50312345678"
+
+2. [Webhook Controller] → request.form.get('Body', 'From')
+   Extrae: texto="El café estaba delicioso", numero="whatsapp:+50312345678"
+
+3. [Webhook Controller] → db_service.save_message(texto, numero)
+
+4. [Database Service] → MongoDB.insert_one({
+     texto_mensaje: "El café estaba delicioso",
+     numero_remitente: "whatsapp:+50312345678",
+     timestamp: ISODate("2024-03-18T..."),
+     sentimiento: null,
+     tema: null,
+     resumen: null
+   })
+
+5. [MongoDB] → Retorna inserted_id = "65f8a..."
+
+6. [Database Service] → Retorna message_id = "65f8a..."
+
+7. [Webhook Controller] → ai_service.analizar_sentimiento(texto)
+
+8. [AI Service] → Construye prompt Few-shot + texto
+
+9. [AI Service] → OpenAI.chat.completions.create(
+     model="gpt-3.5-turbo",
+     messages=[...],
+     temperature=0.3
+   })
+
+10. [OpenAI API] → Retorna {
+      choices: [{
+        message: {
+          content: '{"sentimiento":"positivo","tema":"Calidad del Producto",...}'
+        }
+      }]
+    }
+
+11. [AI Service] → JSON.parse(content)
+    Valida campos, normaliza valores
+
+12. [AI Service] → Retorna {
+      sentimiento: "positivo",
+      tema: "Calidad del Producto",
+      resumen: "Cliente satisfecho con calidad del café",
+      metadatos: {...}
+    }
+
+13. [Webhook Controller] → db_service.update_message_analysis(
+      message_id, "positivo", "Calidad del Producto", "Cliente satisfecho...", {...}
+    )
+
+14. [Database Service] → MongoDB.update_one(
+      {_id: ObjectId("65f8a...")},
+      {$set: {sentimiento: "positivo", tema: "Calidad del Producto", ...}}
+    )
+
+15. [MongoDB] → Confirma actualización
+
+16. [Webhook Controller] → return '', 200
+
+17. [Twilio] → Recibe 200 OK, marca mensaje como procesado
+
+
+================================================================================
+PATRONES DE DISEÑO UTILIZADOS:
+================================================================================
+
+1. MVC (Model-View-Controller)
+   • Controllers: Webhook Controller, API Controller
+   • Services (Models): Database Service, AI Service
+   • Views: JSON responses
+
+2. Repository Pattern
+   • Database Service abstrae MongoDB
+   • Oculta detalles de implementación de BD
+
+3. Service Layer
+   • AI Service encapsula lógica de negocio
+   • Separación de concerns
+
+4. Dependency Injection
+   • Controllers reciben services como dependencias
+   • Facilita testing y modularidad
+
+5. Factory Pattern
+   • OpenAI client creado en __init__ de AIService
+   • MongoDB client creado en __init__ de DatabaseService
+
+
+================================================================================
+POSICIONAMIENTO EN DRAW.IO:
+================================================================================
+
+        TOP
+        ┌─────────────┐
+        │   Twilio    │
+        └─────────────┘
+
+        NIVEL 1 (Controllers)
+        ┌──────────────────┐        ┌──────────────────┐
+        │ Webhook          │        │ API              │
+        │ Controller       │        │ Controller       │
+        └──────────────────┘        └──────────────────┘
+
+        NIVEL 2 (Services)
+        ┌──────────────┐  ┌──────────────┐
+        │  Database    │  │  AI Analysis │
+        │  Service     │  │  Service     │
+        └──────────────┘  └──────────────┘
+
+        NIVEL 3 (Externos)
+        ┌──────────┐      ┌──────────┐
+        │ MongoDB  │      │ OpenAI   │
+        └──────────┘      └──────────┘
+
+        LATERAL (Config - conectado a todos)
+                    ┌────────────┐
+                    │   Config   │
+                    └────────────┘
+
+
+================================================================================
+TÍTULO DEL DIAGRAMA:
+================================================================================
+
+Backend API - Component Diagram
+Componentes internos del Backend Flask y sus interacciones
+
+
+================================================================================
+FIN DEL DIAGRAMA 3 - COMPONENT
+================================================================================

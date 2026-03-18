@@ -1,0 +1,416 @@
+================================================================================
+DIAGRAMA C4 - NIVEL 4: DEPLOYMENT DIAGRAM
+Infraestructura de Despliegue (Desarrollo y Producción)
+================================================================================
+
+INSTRUCCIONES PARA DRAW.IO:
+1. Nodos físicos = Rectángulo 3D (Azul para dev, Verde para prod)
+2. Contenedores = Rectángulos dentro de nodos
+3. Servicios cloud = Nube (Gris)
+4. Red = Líneas punteadas
+5. Crear 2 diagramas separados: DESARROLLO y PRODUCCIÓN
+
+================================================================================
+
+                    DIAGRAMA 4A: ENTORNO DE DESARROLLO
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  MÁQUINA LOCAL DEL DESARROLLADOR                                        │
+│  [Windows 10/11 - Laptop]                                               │
+│  Color: Azul claro (#3B82F6)                                            │
+│  Forma: Rectángulo 3D                                                   │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────┐     │
+│  │  Node 1: Backend Dev Server                                   │     │
+│  │  ─────────────────────────────                                │     │
+│  │  Runtime: Python 3.10                                         │     │
+│  │  Proceso: Flask Development Server                            │     │
+│  │  Puerto: 5000                                                 │     │
+│  │  Comando: python app.py                                       │     │
+│  │  Variables de entorno: desde .env                             │     │
+│  │                                                               │     │
+│  │  Contenedor:                                                  │     │
+│  │  ┌─────────────────────────────────────┐                      │     │
+│  │  │  Backend Flask App                  │                      │     │
+│  │  │  [app.py + servicios + routes]      │                      │     │
+│  │  └─────────────────────────────────────┘                      │     │
+│  └───────────────────────────────────────────────────────────────┘     │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────┐     │
+│  │  Node 2: Frontend Dev Server                                  │     │
+│  │  ──────────────────────────────                               │     │
+│  │  Runtime: Node.js 18                                          │     │
+│  │  Proceso: Vite Dev Server                                     │     │
+│  │  Puerto: 3000                                                 │     │
+│  │  Comando: npm run dev                                         │     │
+│  │  Hot Module Replacement: Enabled                              │     │
+│  │                                                               │     │
+│  │  Contenedor:                                                  │     │
+│  │  ┌─────────────────────────────────────┐                      │     │
+│  │  │  React Frontend SPA                 │                      │     │
+│  │  │  [src/ + componentes]               │                      │     │
+│  │  └─────────────────────────────────────┘                      │     │
+│  └───────────────────────────────────────────────────────────────┘     │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────┐     │
+│  │  Node 3: ngrok Tunnel                                         │     │
+│  │  ──────────────────────                                       │     │
+│  │  Herramienta: ngrok                                           │     │
+│  │  Comando: ngrok http 5000                                     │     │
+│  │  URL pública: https://[random].ngrok.io                       │     │
+│  │  Protocolo: HTTPS tunnel → localhost:5000                     │     │
+│  │                                                               │     │
+│  │  Función: Expone backend local a internet                     │     │
+│  │  para recibir webhooks de Twilio                              │     │
+│  └───────────────────────────────────────────────────────────────┘     │
+└─────────────────────────────────────────────────────────────────────────┘
+           │                    │                          │
+           │                    │                          │
+           │ HTTP:5000          │ HTTP:3000               │ HTTPS
+           │                    │                          │
+           ▼                    ▼                          ▼
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    SERVICIOS CLOUD (Desarrollo)                          │
+│                                                                          │
+│  ┌─────────────────────────┐    ┌─────────────────────────┐             │
+│  │  MongoDB Atlas          │    │  Twilio                 │             │
+│  │  [Cloud Database]       │    │  [WhatsApp Sandbox]     │             │
+│  │  ─────────────────      │    │  ────────────────       │             │
+│  │  Tier: M0 Free          │    │  Sandbox Mode           │             │
+│  │  Región: us-east-1      │    │  Webhook URL:           │             │
+│  │  Replica Set: 3 nodos   │    │  https://xxx.ngrok.io/  │             │
+│  │  Connection:            │    │  webhook/whatsapp       │             │
+│  │  mongodb+srv://...      │    │                         │             │
+│  │  IP Whitelist: 0.0.0.0/0│    │  Método: POST           │             │
+│  │  (allow all)            │    │  Timeout: 15 seg        │             │
+│  └─────────────────────────┘    └─────────────────────────┘             │
+│            ▲                                  │                          │
+│            │                                  │                          │
+│            │ MongoDB                          │ HTTPS                    │
+│            │ Driver                           │ Webhook                  │
+│                                                                          │
+│  ┌─────────────────────────┐                                            │
+│  │  OpenAI API             │                                            │
+│  │  [LLM Service]          │                                            │
+│  │  ───────────────        │                                            │
+│  │  Endpoint:              │                                            │
+│  │  api.openai.com         │                                            │
+│  │  Model: gpt-3.5-turbo   │                                            │
+│  │  Rate Limit: 3 RPM      │                                            │
+│  │  (tier free)            │                                            │
+│  └─────────────────────────┘                                            │
+│            ▲                                                             │
+│            │ HTTPS                                                       │
+│            │ POST /v1/chat/completions                                   │
+└──────────────────────────────────────────────────────────────────────────┘
+
+
+FLUJO DE RED (Desarrollo):
+
+  Cliente WhatsApp
+       │
+       ▼
+  [Twilio Cloud] ──HTTPS──> [ngrok tunnel] ──HTTP──> [localhost:5000 Backend]
+                                                            │
+                                                            ├──> [MongoDB Atlas]
+                                                            └──> [OpenAI API]
+
+  [localhost:3000 Frontend] ──HTTP──> [localhost:5000 Backend]
+
+
+================================================================================
+
+                    DIAGRAMA 4B: ENTORNO DE PRODUCCIÓN
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  RAILWAY / RENDER - BACKEND                                              │
+│  [Container-based Platform]                                              │
+│  Color: Verde (#10B981)                                                  │
+│  Forma: Rectángulo 3D                                                    │
+│                                                                          │
+│  Región: us-east-1 (AWS)                                                 │
+│  Dominio: https://cafe-backend.railway.app                               │
+│  SSL/TLS: Automático (Let's Encrypt)                                     │
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────┐     │
+│  │  Backend Container                                             │     │
+│  │  ───────────────────                                           │     │
+│  │                                                                │     │
+│  │  Runtime: Python 3.10                                          │     │
+│  │  Proceso: Gunicorn (production WSGI server)                    │     │
+│  │  Comando: gunicorn app:app --workers 4                         │     │
+│  │  Puerto: 5000 (internal)                                       │     │
+│  │  Auto-scaling: 1-3 instancias                                  │     │
+│  │  Health check: GET /health cada 30 seg                         │     │
+│  │                                                                │     │
+│  │  Variables de entorno (desde Railway):                         │     │
+│  │  • TWILIO_ACCOUNT_SID                                          │     │
+│  │  • TWILIO_AUTH_TOKEN                                           │     │
+│  │  • MONGODB_URI                                                 │     │
+│  │  • OPENAI_API_KEY                                              │     │
+│  │  • FLASK_ENV=production                                        │     │
+│  │                                                                │     │
+│  │  Recursos:                                                     │     │
+│  │  • CPU: 1 vCPU                                                 │     │
+│  │  • RAM: 512 MB                                                 │     │
+│  │  • Disco: 1 GB                                                 │     │
+│  │                                                                │     │
+│  │  ┌──────────────────────────────────────┐                      │     │
+│  │  │  Flask App                           │                      │     │
+│  │  │  + Webhook Routes                    │                      │     │
+│  │  │  + API Routes                        │                      │     │
+│  │  │  + Services (DB, AI)                 │                      │     │
+│  │  └──────────────────────────────────────┘                      │     │
+│  └────────────────────────────────────────────────────────────────┘     │
+└──────────────────────────────────────────────────────────────────────────┘
+           │                    │                          │
+           │                    │                          │
+           │                    │                          ▼
+           │                    │                  ┌───────────────────┐
+           │                    │                  │  Load Balancer    │
+           │                    │                  │  (Railway)        │
+           │                    │                  │  HTTPS:443        │
+           │                    │                  └───────────────────┘
+           │                    │                          ▲
+           │                    │                          │
+           │                    ▼                          │
+           │           ┌─────────────────────┐            │
+           │           │  Twilio             │            │
+           │           │  [WhatsApp Business]│────────────┘
+           │           │  ─────────────────  │  HTTPS Webhook
+           │           │  Production Account │  POST /webhook/whatsapp
+           │           │  Webhook URL:       │
+           │           │  https://cafe-      │
+           │           │  backend.railway    │
+           │           │  .app/webhook/      │
+           │           │  whatsapp           │
+           │           │                     │
+           │           │  Retry: 3 veces     │
+           │           │  Timeout: 15 seg    │
+           │           └─────────────────────┘
+           │
+           ▼
+┌────────────────────────┐
+│  MongoDB Atlas         │
+│  [Production]          │
+│  ────────────────      │
+│  Tier: M10             │
+│  Región: Multi-región  │
+│  (us-east-1 primary)   │
+│  Replica Set: 3 nodos  │
+│  Backup: Snapshot      │
+│  diario automático     │
+│  IP Whitelist:         │
+│  Railway IP ranges     │
+│  Connection:           │
+│  TLS 1.2+             │
+└────────────────────────┘
+
+
+           ▼
+┌────────────────────────┐
+│  OpenAI API            │
+│  [Production]          │
+│  ────────────────      │
+│  Endpoint:             │
+│  api.openai.com        │
+│  Model: gpt-3.5-turbo  │
+│  Rate Limit:           │
+│  3500 RPM (tier 1)     │
+│  Connection: HTTPS     │
+└────────────────────────┘
+
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│  VERCEL - FRONTEND                                                       │
+│  [Edge Network / CDN]                                                    │
+│  Color: Púrpura (#8B5CF6)                                                │
+│                                                                          │
+│  Dominio: https://cafe-feedback.vercel.app                               │
+│  SSL/TLS: Automático                                                     │
+│  CDN: Global Edge Network (200+ ubicaciones)                             │
+│                                                                          │
+│  ┌────────────────────────────────────────────────────────────────┐     │
+│  │  Static Site                                                   │     │
+│  │  ───────────────                                               │     │
+│  │                                                                │     │
+│  │  Build: npm run build (genera dist/)                           │     │
+│  │  Assets: HTML, CSS, JS (minificados)                           │     │
+│  │  Framework: Vite (optimizado)                                  │     │
+│  │  Caching: Aggressive (immutable assets)                        │     │
+│  │                                                                │     │
+│  │  Variables de entorno:                                         │     │
+│  │  • VITE_API_BASE_URL=https://cafe-backend.railway.app/api      │     │
+│  │                                                                │     │
+│  │  ┌──────────────────────────────────────┐                      │     │
+│  │  │  React App (compilado)               │                      │     │
+│  │  │  index.html + bundle.js + styles.css │                      │     │
+│  │  └──────────────────────────────────────┘                      │     │
+│  └────────────────────────────────────────────────────────────────┘     │
+└──────────────────────────────────────────────────────────────────────────┘
+           │
+           │ HTTPS GET
+           │ /api/*
+           ▼
+    [Railway Backend]
+
+
+FLUJO DE RED (Producción):
+
+  Cliente WhatsApp
+       │
+       ▼
+  [Twilio Cloud] ──HTTPS──> [Railway Backend] ──┬──> [MongoDB Atlas]
+                                                  └──> [OpenAI API]
+
+  Navegador del Gerente
+       │
+       ▼
+  [Vercel CDN] (HTML/JS/CSS) ──┐
+       │                       │
+       │ API calls             │
+       ▼                       │
+  [Railway Backend] ───────────┘
+
+
+================================================================================
+COMPARACIÓN DESARROLLO vs PRODUCCIÓN:
+================================================================================
+
+| Componente      | Desarrollo           | Producción              |
+|-----------------|----------------------|-------------------------|
+| Backend         | Flask Dev (1 thread) | Gunicorn (4 workers)    |
+| Backend Host    | localhost:5000       | Railway Cloud           |
+| Backend Tunnel  | ngrok                | Load Balancer           |
+| Frontend        | Vite Dev Server      | Vercel CDN (static)     |
+| Frontend Host   | localhost:3000       | Vercel Edge Network     |
+| MongoDB         | Atlas M0 (free)      | Atlas M10 (production)  |
+| MongoDB IP      | 0.0.0.0/0 (all)      | Railway IP ranges       |
+| OpenAI Tier     | Free (3 RPM)         | Tier 1 (3500 RPM)       |
+| SSL/TLS         | Solo Twilio/OpenAI   | Todo (end-to-end)       |
+| Logs            | Console              | Railway/Vercel Logs     |
+| Backups         | Manual               | Automático diario       |
+| Costo mensual   | $0                   | ~$75-95                 |
+
+
+================================================================================
+DIAGRAMA DE RED (Producción):
+================================================================================
+
+
+                            INTERNET
+                               │
+                               │
+        ┌──────────────────────┼──────────────────────┐
+        │                      │                      │
+        ▼                      ▼                      ▼
+  ┌──────────┐        ┌────────────────┐      ┌───────────┐
+  │  Vercel  │        │  Railway       │      │  Twilio   │
+  │   CDN    │        │  Load Balancer │      │  Gateway  │
+  │  (Edge)  │        │  HTTPS:443     │      └───────────┘
+  └────┬─────┘        └───────┬────────┘
+       │                      │
+       │ API calls            │
+       └──────────────────────┤
+                              │
+                              ▼
+                      ┌────────────────┐
+                      │  Backend       │
+                      │  Container(s)  │
+                      │  (1-3 pods)    │
+                      └────┬───────┬───┘
+                           │       │
+                           │       └──────────┐
+                           ▼                  ▼
+                    ┌────────────┐    ┌────────────┐
+                    │  MongoDB   │    │  OpenAI    │
+                    │  Atlas     │    │  API       │
+                    │  Cluster   │    └────────────┘
+                    └────────────┘
+
+
+================================================================================
+SEGURIDAD EN PRODUCCIÓN:
+================================================================================
+
+1. HTTPS End-to-End
+   ✅ Vercel: TLS 1.3 automático
+   ✅ Railway: TLS 1.2+ automático
+   ✅ MongoDB: TLS required
+   ✅ OpenAI: HTTPS obligatorio
+
+2. Validación de Webhooks
+   ✅ Twilio signature validation
+   ✅ CORS configurado (no *)
+   ✅ Rate limiting en API
+
+3. Secrets Management
+   ✅ Variables de entorno (no en código)
+   ✅ .env en .gitignore
+   ✅ Rotación de keys recomendada cada 90 días
+
+4. Network Isolation
+   ✅ MongoDB IP whitelist
+   ✅ No puertos expuestos directamente
+   ✅ Load balancer como único punto de entrada
+
+5. Monitoring
+   ✅ Health checks cada 30 seg
+   ✅ Logs centralizados
+   ✅ Alertas en errores >5%
+
+
+================================================================================
+ESCALABILIDAD:
+================================================================================
+
+Horizontal Scaling (Producción):
+• Vercel: Auto-scale (CDN global)
+• Railway: Manual scale 1-5 pods
+• MongoDB: Auto-scale reads (replica set)
+
+Vertical Scaling:
+• Railway: Upgrade RAM/CPU según demanda
+• MongoDB: Upgrade tier (M10 → M20 → M30)
+
+Caching (Futuro):
+• Redis para agregaciones
+• TTL: 60 segundos
+• Reduce carga en MongoDB
+
+
+================================================================================
+POSICIONAMIENTO EN DRAW.IO:
+================================================================================
+
+DIAGRAMA 4A (DESARROLLO):
+  TOP: Máquina Local (rectángulo 3D grande)
+    Dentro: 3 nodos (Backend, Frontend, ngrok)
+  BOTTOM: Servicios Cloud (3 nubes)
+    MongoDB Atlas, Twilio, OpenAI
+
+DIAGRAMA 4B (PRODUCCIÓN):
+  LEFT: Railway (rectángulo 3D verde)
+  RIGHT: Vercel (rectángulo 3D púrpura)
+  BOTTOM: Servicios (MongoDB, OpenAI, Twilio)
+  CENTER: Internet/Red (nube grande)
+
+
+================================================================================
+TÍTULO DE LOS DIAGRAMAS:
+================================================================================
+
+Diagrama 4A: Deployment - Entorno de Desarrollo
+Infraestructura local con servicios cloud
+
+Diagrama 4B: Deployment - Entorno de Producción
+Infraestructura cloud completa con alta disponibilidad
+
+
+================================================================================
+FIN DEL DIAGRAMA 4 - DEPLOYMENT
+================================================================================

@@ -1,0 +1,203 @@
+================================================================================
+DIAGRAMA C4 - NIVEL 1: SYSTEM CONTEXT
+Sistema de Análisis de Feedback - Café de El Salvador
+================================================================================
+
+INSTRUCCIONES PARA DRAW.IO:
+1. Personas = Icono de persona (azul claro #3B82F6)
+2. Sistemas externos = Rectángulo con bordes redondeados (gris #6B7280)
+3. Sistema principal = Rectángulo grande (verde #10B981)
+4. Flechas = Líneas con puntas, etiquetas en cursiva
+
+================================================================================
+
+                                VISTA GENERAL
+
+
+    [PERSONA]                                              [PERSONA]
+    ┌─────────────────┐                                ┌─────────────────┐
+    │                 │                                │                 │
+    │    CLIENTE      │                                │    GERENTE      │
+    │                 │                                │                 │
+    │  Cliente del    │                                │  Administrador  │
+    │  café que envía │                                │  del café que   │
+    │  feedback       │                                │  toma decisiones│
+    │                 │                                │                 │
+    └────────┬────────┘                                └────────▲────────┘
+             │                                                  │
+             │ (1) Envía mensaje                               │ (7) Visualiza
+             │     de feedback                                 │     dashboard
+             │                                                 │
+             ▼                                                 │
+    ┌──────────────────┐                                      │
+    │ SISTEMA EXTERNO  │                                      │
+    │                  │                                      │
+    │    WhatsApp      │                                      │
+    │                  │                                      │
+    │  Plataforma de   │                                      │
+    │  mensajería      │                                      │
+    └────────┬─────────┘                                      │
+             │                                                 │
+             │ (2) Reenvía                                    │
+             │     mensaje                                    │
+             ▼                                                 │
+    ┌──────────────────┐                                      │
+    │ SISTEMA EXTERNO  │                                      │
+    │                  │                                      │
+    │     Twilio       │                                      │
+    │                  │                                      │
+    │  WhatsApp API    │                                      │
+    │  Gateway         │                                      │
+    └────────┬─────────┘                                      │
+             │                                                 │
+             │ (3) Webhook                                    │
+             │     HTTPS POST                                 │
+             │                                                 │
+             ▼                                                 │
+    ┌────────────────────────────────────────────────────────┐│
+    │         SISTEMA PRINCIPAL (VERDE)                      ││
+    │                                                        ││
+    │  Sistema de Análisis de Feedback del Cliente          ││
+    │  vía WhatsApp                                          ││
+    │                                                        ││
+    │  • Recibe mensajes de WhatsApp                         ││
+    │  • Analiza sentimiento con IA                          ││
+    │  • Almacena datos en base de datos                     ││
+    │  • Genera dashboard interactivo                        ││
+    │                                                        ││
+    │  [Python Backend + React Frontend + MongoDB]           ││
+    │                                                        ││
+    └────────────────────────────────────────────────────────┘│
+             │                                                 │
+             └─────────────────────────────────────────────────┘
+                          (6) Dashboard web
+                              con estadísticas
+
+
+    (4) Sistema consulta ──────────────────┐
+        OpenAI API                         │
+             │                             │
+             ▼                             │
+    ┌──────────────────┐                  │
+    │ SISTEMA EXTERNO  │                  │
+    │                  │                  │
+    │    OpenAI API    │                  │
+    │                  │                  │
+    │  GPT-3.5-turbo   │                  │
+    │  Análisis de     │                  │
+    │  sentimiento     │                  │
+    └──────────────────┘                  │
+                                          │
+    (5) IA retorna análisis               │
+        en JSON                           │
+                                          │
+             ┌────────────────────────────┘
+             ▼
+    ┌──────────────────┐
+    │ SISTEMA EXTERNO  │
+    │                  │
+    │  MongoDB Atlas   │
+    │                  │
+    │  Base de datos   │
+    │  en la nube      │
+    │                  │
+    └──────────────────┘
+
+
+================================================================================
+LEYENDA DE COLORES PARA DRAW.IO:
+================================================================================
+
+[PERSONA] = Icono de persona
+  - Color de fondo: Azul claro (#3B82F6)
+  - Texto: Blanco
+
+[SISTEMA EXTERNO] = Rectángulo redondeado
+  - Color de fondo: Gris (#6B7280)
+  - Borde: Gris oscuro
+  - Texto: Blanco
+
+[SISTEMA PRINCIPAL] = Rectángulo grande
+  - Color de fondo: Verde (#10B981)
+  - Borde: Verde oscuro (#059669)
+  - Texto: Blanco
+  - Tamaño: 2x más grande que externos
+
+FLECHAS:
+  - Color: Negro
+  - Grosor: 2px
+  - Etiquetas: Cursiva, tamaño 11pt
+
+
+================================================================================
+RELACIONES (FLECHAS CON ETIQUETAS):
+================================================================================
+
+1. Cliente → WhatsApp
+   Etiqueta: "Envía mensaje de feedback vía app móvil"
+
+2. WhatsApp → Twilio
+   Etiqueta: "Reenvía mensaje a través de WhatsApp Business API"
+
+3. Twilio → Sistema Principal
+   Etiqueta: "Webhook HTTPS POST con datos del mensaje"
+
+4. Sistema Principal → OpenAI API
+   Etiqueta: "Solicita análisis de sentimiento (API REST)"
+
+5. OpenAI API → Sistema Principal
+   Etiqueta: "Retorna análisis en formato JSON"
+
+6. Sistema Principal → MongoDB Atlas
+   Etiqueta: "Almacena mensajes y análisis (MongoDB Driver)"
+
+7. Sistema Principal → Gerente
+   Etiqueta: "Muestra dashboard web con estadísticas en tiempo real"
+
+
+================================================================================
+POSICIONAMIENTO EN DRAW.IO:
+================================================================================
+
+         ARRIBA IZQUIERDA          ARRIBA DERECHA
+         ┌─────────────────┐       ┌─────────────────┐
+         │    CLIENTE      │       │    GERENTE      │
+         └─────────────────┘       └─────────────────┘
+
+         CENTRO IZQUIERDA
+         ┌─────────────────┐
+         │    WhatsApp     │
+         └─────────────────┘
+         ┌─────────────────┐
+         │     Twilio      │
+         └─────────────────┘
+
+         CENTRO (GRANDE)
+         ┌───────────────────────────────────┐
+         │   SISTEMA PRINCIPAL               │
+         │   (2x más grande que los demás)   │
+         └───────────────────────────────────┘
+
+         DERECHA
+         ┌─────────────────┐
+         │   OpenAI API    │
+         └─────────────────┘
+         ┌─────────────────┐
+         │ MongoDB Atlas   │
+         └─────────────────┘
+
+
+================================================================================
+TÍTULO DEL DIAGRAMA:
+================================================================================
+
+Sistema de Análisis de Feedback del Cliente - Café de El Salvador
+[System Context Diagram]
+
+Muestra el sistema en su contexto más amplio, incluyendo usuarios
+y sistemas externos con los que interactúa.
+
+
+================================================================================
+FIN DEL DIAGRAMA 1 - SYSTEM CONTEXT
+================================================================================
