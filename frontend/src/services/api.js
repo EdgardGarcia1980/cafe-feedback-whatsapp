@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Usar URL de producción si está en build de producción, sino localhost
+const API_BASE_URL = import.meta.env.PROD
+  ? 'RAILWAY_URL_PLACEHOLDER/api'  // Se actualizará después del deploy
+  : 'http://localhost:5000/api';
 
 export const api = {
   // Obtener estadísticas de sentimientos
