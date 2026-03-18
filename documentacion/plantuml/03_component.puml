@@ -1,0 +1,37 @@
+@startuml C4_Component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama C4 - Nivel 3: Componentes (API REST)
+
+Container(webapp, "Aplicación Web", "React", "Interfaz de usuario")
+System_Ext(twilio, "Twilio", "Gateway WhatsApp")
+System_Ext(openai, "OpenAI", "Análisis IA")
+ContainerDb(db, "Base de Datos", "MongoDB")
+
+Container_Boundary(api, "API REST - Flask") {
+    Component(app, "Flask App", "app.py", "Aplicación principal y configuración CORS")
+    Component(webhook_routes, "Webhook Routes", "webhook_routes.py", "Recibe mensajes de Twilio")
+    Component(api_routes, "API Routes", "api_routes.py", "Endpoints de consulta de datos")
+    Component(ai_service, "AI Service", "ai_service.py", "Lógica de análisis de sentimientos")
+    Component(db_service, "Database Service", "database_service.py", "Operaciones de MongoDB")
+    Component(message_model, "Message Model", "message.py", "Esquema y validación de datos")
+}
+
+Rel(twilio, webhook_routes, "POST /webhook/whatsapp", "HTTPS")
+Rel(webapp, api_routes, "GET /api/*", "HTTPS")
+
+Rel(webhook_routes, message_model, "Valida datos")
+Rel(webhook_routes, db_service, "Guarda mensaje")
+Rel(webhook_routes, ai_service, "Analiza sentimiento")
+
+Rel(api_routes, db_service, "Consulta estadísticas")
+
+Rel(ai_service, openai, "Analiza texto", "HTTPS")
+Rel(db_service, db, "Lee/Escribe", "MongoDB")
+
+Rel(app, webhook_routes, "Registra rutas")
+Rel(app, api_routes, "Registra rutas")
+
+@enduml

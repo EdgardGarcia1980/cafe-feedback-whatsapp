@@ -1,0 +1,49 @@
+@startuml C4_Deployment
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama C4 - Nivel 4: Despliegue en Producción
+
+Deployment_Node(cliente_mobile, "Dispositivo Móvil", "Android/iOS") {
+    Container(whatsapp_app, "WhatsApp", "Aplicación móvil")
+}
+
+Deployment_Node(cliente_web, "Navegador Web", "Chrome, Firefox, Safari") {
+    Container(browser, "Navegador", "Aplicación web")
+}
+
+Deployment_Node(vercel, "Vercel", "CDN Global") {
+    Deployment_Node(vercel_edge, "Edge Network") {
+        Container(frontend, "Aplicación React", "React 18, Vite, TailwindCSS", "Interfaz de usuario del tablero")
+    }
+}
+
+Deployment_Node(railway, "Railway", "Plataforma Cloud") {
+    Deployment_Node(railway_container, "Contenedor Docker") {
+        Container(backend, "API Flask", "Python 3.10, Flask, Gunicorn", "Servidor de aplicación")
+    }
+}
+
+Deployment_Node(twilio_cloud, "Twilio Cloud", "Plataforma de comunicaciones") {
+    Container(twilio_api, "WhatsApp API", "Gateway de mensajería")
+}
+
+Deployment_Node(mongodb_cloud, "MongoDB Atlas", "Database as a Service") {
+    Deployment_Node(mongodb_cluster, "Cluster M0") {
+        ContainerDb(mongodb, "MongoDB", "Base de datos NoSQL")
+    }
+}
+
+Deployment_Node(openai_cloud, "OpenAI Cloud", "AI as a Service") {
+    Container(openai_api, "GPT-3.5 API", "Modelo de lenguaje")
+}
+
+Rel(whatsapp_app, twilio_api, "Envía mensaje", "HTTPS")
+Rel(twilio_api, backend, "Webhook", "HTTPS POST")
+Rel(browser, frontend, "Carga página", "HTTPS")
+Rel(frontend, backend, "Consulta datos", "HTTPS/JSON")
+Rel(backend, mongodb, "Lee/Escribe", "MongoDB Protocol TLS")
+Rel(backend, openai_api, "Analiza", "HTTPS/JSON")
+
+@enduml

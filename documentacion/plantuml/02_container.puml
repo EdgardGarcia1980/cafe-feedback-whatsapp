@@ -1,0 +1,27 @@
+@startuml C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama C4 - Nivel 2: Contenedores
+
+Person(cliente, "Cliente del Café", "Envía feedback por WhatsApp")
+Person(dueno, "Dueño del Café", "Revisa estadísticas")
+
+System_Boundary(sistema, "Sistema de Análisis de Sentimientos") {
+    Container(webapp, "Aplicación Web", "React, Vite, TailwindCSS", "Tablero interactivo con gráficos y estadísticas")
+    Container(api, "API REST", "Flask, Python", "Procesa webhooks, analiza sentimientos y sirve datos")
+    ContainerDb(db, "Base de Datos", "MongoDB", "Almacena mensajes, análisis y metadatos")
+}
+
+System_Ext(twilio, "Twilio", "Gateway de WhatsApp")
+System_Ext(openai, "OpenAI API", "Análisis de sentimientos")
+
+Rel(cliente, twilio, "Envía mensaje", "WhatsApp")
+Rel(twilio, api, "Webhook POST", "HTTPS/JSON")
+Rel(dueno, webapp, "Consulta", "HTTPS")
+Rel(webapp, api, "Obtiene datos", "HTTPS/JSON")
+Rel(api, db, "Lee/Escribe", "MongoDB Protocol")
+Rel(api, openai, "Analiza texto", "HTTPS/JSON")
+
+@enduml

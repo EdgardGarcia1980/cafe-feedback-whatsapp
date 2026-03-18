@@ -1,0 +1,25 @@
+@startuml C4_System_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Diagrama C4 - Nivel 1: Contexto del Sistema
+
+Person(cliente, "Cliente del Café", "Usuario que envía feedback por WhatsApp")
+Person(dueno, "Dueño del Café", "Analiza los comentarios en el tablero web")
+
+System(sistema, "Sistema de Análisis de Sentimientos", "Recibe mensajes de WhatsApp, analiza sentimientos y muestra estadísticas")
+
+System_Ext(whatsapp, "WhatsApp", "Aplicación de mensajería")
+System_Ext(twilio, "Twilio", "Gateway de WhatsApp Business API")
+System_Ext(openai, "OpenAI API", "Servicio de análisis de sentimientos con GPT-3.5")
+System_Ext(mongodb, "MongoDB Atlas", "Base de datos en la nube")
+
+Rel(cliente, whatsapp, "Envía feedback", "Mensaje de texto")
+Rel(whatsapp, twilio, "Reenvía mensaje", "HTTPS")
+Rel(twilio, sistema, "Webhook", "HTTPS POST")
+Rel(sistema, openai, "Analiza sentimiento", "API REST")
+Rel(sistema, mongodb, "Guarda y consulta datos", "MongoDB Protocol")
+Rel(dueno, sistema, "Consulta estadísticas", "HTTPS")
+
+@enduml
