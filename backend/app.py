@@ -12,8 +12,11 @@ CORS(app, resources={
     r"/api/*": {
         "origins": [
             "http://localhost:3000",  # Desarrollo local
-            "https://*.vercel.app"     # Producción en Vercel
-        ]
+            "https://cafe-feedback-whatsapp.vercel.app",  # Producción en Vercel
+            "https://*.vercel.app"     # Otros deployments de Vercel
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
     },
     r"/webhook/*": {"origins": "*"}  # Twilio puede venir de cualquier IP
 })
