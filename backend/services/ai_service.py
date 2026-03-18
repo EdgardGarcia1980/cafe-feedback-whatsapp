@@ -2,16 +2,19 @@ from openai import OpenAI
 from config import Config
 import json
 import time
-import httpx
+import os
 
 class AIService:
     def __init__(self):
-        # Crear cliente HTTP sin proxies para evitar conflictos en Railway
-        http_client = httpx.Client(proxies=None)
-        self.client = OpenAI(
-            api_key=Config.OPENAI_API_KEY,
-            http_client=http_client
-        )
+        # Eliminar variables de ambiente de proxy para evitar conflictos
+        os.environ.pop('HTTP_PROXY', None)
+        os.environ.pop('HTTPS_PROXY', None)
+        os.environ.pop('http_proxy', None)
+        os.environ.pop('https_proxy', None)
+        os.environ.pop('ALL_PROXY', None)
+        os.environ.pop('all_proxy', None)
+
+        self.client = OpenAI(api_key=Config.OPENAI_API_KEY)
         self.model = "gpt-3.5-turbo"
         self.prompt_version = "1.0"
 
